@@ -5,22 +5,61 @@ import Item from "./Item";
 
 function ShoppingList({ items }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearchChange] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [itemsList, setItemsList] = useState(items || []);
+  const [itemCategory, setItemCategory] = useState("Produce");
 
   function handleCategoryChange(event) {
     setSelectedCategory(event.target.value);
   }
 
-  const itemsToDisplay = items.filter((item) => {
-    if (selectedCategory === "All") return true;
+   function handleSearchChange(e) {
+    setSearchChange(e.target.value);
+  }
+  
+  function handleNewItem(e){
+    setItemName(e.target.value);
+  }
 
-    return item.category === selectedCategory;
-  });
+  function onItemFormSubmit (newItem) {    
+    setItemsList((prev) => [...prev, newItem]);
+    setItemName("");
+    setItemCategory("Produce");
+  }
+
+  function handleItemCategoryChange (e) {
+    setItemCategory(e.target.value);
+  }
+
+  const itemsToDisplay = itemsList.filter((item) => {
+    const categoryMatches =
+      selectedCategory === "All" || item.category === selectedCategory;
+    
+      
+      const searchMatches = item.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+  return categoryMatches && searchMatches;
+});
+ 
 
   return (
     <div className="ShoppingList">
-      <ItemForm />
-      <Filter onCategoryChange={handleCategoryChange} />
-      <ul className="Items">
+      <ItemForm
+        itemName={itemName}
+        itemCategory={itemCategory}
+        onItemNameChange={handleNewItem}
+        onItemCategoryChange={handleItemCategoryChange}
+        onItemFormSubmit={onItemFormSubmit}       
+      />
+      <Filter
+        search={search} 
+        onCategoryChange={handleCategoryChange}
+        onSearchChange={handleSearchChange}
+       />
+      <ul  className="Items">
         {itemsToDisplay.map((item) => (
           <Item key={item.id} name={item.name} category={item.category} />
         ))}
